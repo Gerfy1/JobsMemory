@@ -25,9 +25,16 @@ public class AuthService {
 
     public ResponseEntity<?> login(User user) {
         Optional<User> foundUser = this.userRepository.findByUsername(user.getUsername());
-        if (foundUser.isPresent() && this.passwordEncoder.matches(user.getPassword(), ((User)foundUser.get()).getPassword())) {
-            String token = this.jwtUtil.generateToken(new org.springframework.security.core.userdetails.User(((User)foundUser.get()).getUsername(), ((User)foundUser.get()).getPassword(), new ArrayList<>()));
-            return ResponseEntity.ok(new LoginResponse(token, ((User)foundUser.get()).getId(), ((User)foundUser.get()).getUsername()));
+        if (foundUser.isPresent() && this.passwordEncoder.matches(user.getPassword(), foundUser.get().getPassword())) {
+            User authenticatedUser = foundUser.get(); // Extract once
+            String token = this.jwtUtil.generateToken(
+                    new org.springframework.security.core.userdetails.User(
+                            authenticatedUser.getUsername(),
+                            authenticatedUser.getPassword(),
+                            new ArrayList<>()
+                    )
+            );
+            return ResponseEntity.ok(new LoginResponse(token, authenticatedUser.getId(), authenticatedUser.getUsername()));
         } else {
             return ResponseEntity.status(401).body("Usuário ou senha inválidos");
         }

@@ -2,6 +2,8 @@ package com.Jobs.JobsMemory.controller;
 
 import com.Jobs.JobsMemory.model.User;
 import com.Jobs.JobsMemory.service.AuthService;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -46,20 +48,8 @@ public class AuthController {
     }
 
     @PostMapping({"/login"})
-    public ResponseEntity<Map<String, Object>> login(@RequestBody User user) {
+    public ResponseEntity<?> login(@RequestBody User user) {
         System.out.println("Received login request: " + user);
-        User existUser = (User) this.authService.findByUsername(user.getUsername()).orElse(null);
-        if (existUser != null && this.authService.checkPassword(user.getPassword(), existUser.getPassword())) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Login efetuado com sucesso");
-            response.put("userId", existUser.getId());
-            response.put("username", existUser.getUsername());
-            response.put("token", this.authService.login(user).getBody());
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } else {
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Usuário ou senha inválidos");
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
+        return this.authService.login(user);
     }
 }
