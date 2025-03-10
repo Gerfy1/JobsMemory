@@ -33,13 +33,13 @@ public class AuthController {
         Optional<User> existingUser = this.authService.findByUsername(user.getUsername());
         if (existingUser.isPresent()) {
             System.out.println("User already exists: " + user.getUsername());
-            Map<String, String> response = new HashMap();
+            Map<String, String> response = new HashMap<>();
             response.put("message", "Esse usuário já existe");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         } else {
             System.out.println("Creating new user: " + user.getUsername());
             this.authService.register(user);
-            Map<String, String> response = new HashMap();
+            Map<String, String> response = new HashMap<>();
             response.put("message", "Usuário criado com sucesso");
             return new ResponseEntity<>(response, HttpStatus.CREATED);
         }
@@ -48,16 +48,16 @@ public class AuthController {
     @PostMapping({"/login"})
     public ResponseEntity<Map<String, Object>> login(@RequestBody User user) {
         System.out.println("Received login request: " + user);
-        User existUser = (User)this.authService.findByUsername(user.getUsername()).orElse(null);
+        User existUser = (User) this.authService.findByUsername(user.getUsername()).orElse(null);
         if (existUser != null && this.authService.checkPassword(user.getPassword(), existUser.getPassword())) {
-            Map<String, Object> response = new HashMap();
+            Map<String, Object> response = new HashMap<>();
             response.put("message", "Login efetuado com sucesso");
             response.put("userId", existUser.getId());
             response.put("username", existUser.getUsername());
             response.put("token", this.authService.login(user).getBody());
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
-            Map<String, Object> response = new HashMap();
+            Map<String, Object> response = new HashMap<>();
             response.put("message", "Usuário ou senha inválidos");
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
