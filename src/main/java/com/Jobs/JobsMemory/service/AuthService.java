@@ -47,7 +47,10 @@ public class AuthService {
     }
 
     public Optional<User> findByUsername(String username) {
-        return this.userRepository.findByUsername(username);
+        System.out.println("Searching for user: " + username);
+        Optional<User> user = this.userRepository.findByUsername(username);
+        System.out.println("User found: " + user.isPresent());
+        return user;
     }
 
     public boolean checkPassword(String rawPassword, String encodedPassword) {

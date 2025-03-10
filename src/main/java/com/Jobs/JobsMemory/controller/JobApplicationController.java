@@ -50,7 +50,8 @@ public class JobApplicationController {
     @GetMapping({"/{id}"})
     public ResponseEntity<JobApplication> getJobApplicationById(@PathVariable Long id) {
         Optional<JobApplication> jobApplication = this.jobApplicationService.getJobApplicationById(id);
-        return (ResponseEntity)jobApplication.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return jobApplication.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
