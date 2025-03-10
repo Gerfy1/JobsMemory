@@ -4,6 +4,8 @@ import com.Jobs.JobsMemory.model.User;
 import com.Jobs.JobsMemory.service.AuthService;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,13 +30,14 @@ public class AuthController {
     @PostMapping({"/register"})
     public ResponseEntity<Map<String, String>> register(@RequestBody User user) {
         System.out.println("Received register request: " + user);
-        if (this.authService.findByUsername(user.getUsername()) != null) {
+        Optional<User> existingUser = this.authService.findByUsername(user.getUsername());
+        if (existingUser.isPresent()) {
             System.out.println("User already exists: " + user.getUsername());
             Map<String, String> response = new HashMap();
             response.put("message", "Esse usuário já existe");
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
         } else {
-            System.out.println("Creating new user: " + user.getUsername()); // Adicione este log
+            System.out.println("Creating new user: " + user.getUsername());
             this.authService.register(user);
             Map<String, String> response = new HashMap();
             response.put("message", "Usuário criado com sucesso");
