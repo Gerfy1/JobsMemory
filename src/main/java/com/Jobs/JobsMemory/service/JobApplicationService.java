@@ -24,13 +24,13 @@ public class JobApplicationService {
     }
 
     public JobApplication saveJobApplication(JobApplication jobApplication) {
-        return (JobApplication)this.jobApplicationRepository.save(jobApplication);
+        return this.jobApplicationRepository.save(jobApplication);
     }
 
     public JobApplication updateJobApplication(Long id, String status) {
-        JobApplication jobApplication = (JobApplication)this.jobApplicationRepository.findById(id).orElseThrow(() -> new RuntimeException("Job Application not found"));
+        JobApplication jobApplication = this.jobApplicationRepository.findById(id).orElseThrow(() -> new RuntimeException("Job Application not found"));
         jobApplication.setStatus(status);
-        return (JobApplication)this.jobApplicationRepository.save(jobApplication);
+        return this.jobApplicationRepository.save(jobApplication);
     }
 
     public void deleteJobApplication(Long id) {

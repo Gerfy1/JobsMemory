@@ -60,7 +60,7 @@ public class ReminderController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
             Optional<Reminder> reminder = this.reminderService.getReminderById(id);
-            return reminder.isPresent() && ((Reminder)reminder.get()).getJobApplication().getUser().getId().equals(currentUser.getId()) ? ResponseEntity.ok((Reminder)reminder.get()) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return reminder.isPresent() && reminder.get().getJobApplication().getUser().getId().equals(currentUser.getId()) ? ResponseEntity.ok((Reminder)reminder.get()) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
@@ -71,7 +71,7 @@ public class ReminderController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
             Optional<JobApplication> jobApp = this.jobApplicationService.getJobApplicationById(jobApplicationId);
-            if (jobApp.isPresent() && ((JobApplication)jobApp.get()).getUser().getId().equals(currentUser.getId())) {
+            if (jobApp.isPresent() && jobApp.get().getUser().getId().equals(currentUser.getId())) {
                 List<Reminder> reminders = this.reminderService.getRemindersByJobApplicationId(jobApplicationId);
                 return ResponseEntity.ok(reminders);
             } else {

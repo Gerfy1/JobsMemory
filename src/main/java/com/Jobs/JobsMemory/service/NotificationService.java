@@ -30,13 +30,13 @@ public class NotificationService {
         notification.setMessage(message);
         notification.setRead(false);
         notification.setCreatedAt(LocalDateTime.now());
-        return (Notification)this.notificationRepository.save(notification);
+        return this.notificationRepository.save(notification);
     }
 
     public Notification markAsRead(Long id) {
         Notification notification = (Notification)this.notificationRepository.findById(id).orElseThrow(() -> new RuntimeException("Notification not found"));
         notification.setRead(true);
-        return (Notification)this.notificationRepository.save(notification);
+        return this.notificationRepository.save(notification);
     }
 
     public void markAllAsRead(Long userId) {

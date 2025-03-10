@@ -22,11 +22,11 @@ public class UserService implements UserDetailsService {
     public User save(User user) {
         user.setPassword(this.passwordEncoder.encode(user.getPassword()));
         user.setRole("USER");
-        return (User)this.userRepository.save(user);
+        return this.userRepository.save(user);
     }
 
     public User findByUsername(String username) {
-        return (User)this.userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+        return this.userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

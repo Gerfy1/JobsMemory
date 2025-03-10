@@ -26,7 +26,7 @@ public class AuthService {
     public ResponseEntity<?> login(User user) {
         Optional<User> foundUser = this.userRepository.findByUsername(user.getUsername());
         if (foundUser.isPresent() && this.passwordEncoder.matches(user.getPassword(), foundUser.get().getPassword())) {
-            User authenticatedUser = foundUser.get(); // Extract once
+            User authenticatedUser = foundUser.get();
             String token = this.jwtUtil.generateToken(
                     new org.springframework.security.core.userdetails.User(
                             authenticatedUser.getUsername(),

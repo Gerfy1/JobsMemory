@@ -1,6 +1,7 @@
 package com.Jobs.JobsMemory.controller;
 
 import com.Jobs.JobsMemory.model.User;
+import com.Jobs.JobsMemory.repository.UserRepository;
 import com.Jobs.JobsMemory.service.AuthService;
 
 import java.util.ArrayList;
@@ -26,6 +27,8 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    private UserRepository userRepository;
+
     public AuthController() {
     }
 
@@ -33,23 +36,26 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> register(@RequestBody User user) {
         try {
             System.out.println("Received register request: " + user);
+            boolean userExists = false;
+            try {
+                userExists = this.userRepository.existsByUsername(user.getUsername());
+                System.out.println("Usuário existe? " + userExists);
+            } catch (Exception e) {
+                System.err.println("Erro ao verificar existência: " + e);
+                e.printStackTrace();
+            }
 
-            System.out.println("Searching for username: " + user.getUsername());
-
-            Optional<User> existingUser = this.authService.findByUsername(user.getUsername());
-            System.out.println("Result of findByUsername: " + existingUser);
-
-            if (existingUser.isPresent()) {
-                System.out.println("User already exists: " + user.getUsername());
-                Map<String, String> response = new HashMap<>();
-                response.put("message", "Esse usuário já existe");
-                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-            } else {
+            if (!userExists) {
                 System.out.println("Creating new user: " + user.getUsername());
                 this.authService.register(user);
                 Map<String, String> response = new HashMap<>();
                 response.put("message", "Usuário criado com sucesso");
                 return new ResponseEntity<>(response, HttpStatus.CREATED);
+            } else {
+                System.out.println("User already exists: " + user.getUsername());
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Esse usuário já existe");
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
             System.err.println("Error during registration: " + e.getMessage());
