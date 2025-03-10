@@ -29,10 +29,12 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> register(@RequestBody User user) {
         System.out.println("Received register request: " + user);
         if (this.authService.findByUsername(user.getUsername()) != null) {
+            System.out.println("User already exists: " + user.getUsername());
             Map<String, String> response = new HashMap();
             response.put("message", "Esse usuário já existe");
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
         } else {
+            System.out.println("Creating new user: " + user.getUsername()); // Adicione este log
             this.authService.register(user);
             Map<String, String> response = new HashMap();
             response.put("message", "Usuário criado com sucesso");
