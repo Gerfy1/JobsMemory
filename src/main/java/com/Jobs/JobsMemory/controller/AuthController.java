@@ -35,13 +35,13 @@ public class AuthController {
             System.out.println("User already exists: " + user.getUsername());
             Map<String, String> response = new HashMap();
             response.put("message", "Esse usuário já existe");
-            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         } else {
             System.out.println("Creating new user: " + user.getUsername());
             this.authService.register(user);
             Map<String, String> response = new HashMap();
             response.put("message", "Usuário criado com sucesso");
-            return new ResponseEntity(response, HttpStatus.CREATED);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         }
     }
 
@@ -55,11 +55,11 @@ public class AuthController {
             response.put("userId", existUser.getId());
             response.put("username", existUser.getUsername());
             response.put("token", this.authService.login(user).getBody());
-            return new ResponseEntity(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
             Map<String, Object> response = new HashMap();
             response.put("message", "Usuário ou senha inválidos");
-            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
     }
 }
