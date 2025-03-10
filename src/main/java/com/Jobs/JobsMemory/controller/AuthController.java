@@ -20,7 +20,12 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping({"/api/auth"})
 @CrossOrigin(
-        origins = {"https://login-angular-eight.vercel.app"},
+        origins = {
+                "http://localhost:4200",
+                "https://login-angular-eight.vercel.app",
+                "https://login-angular-git-master-gerfy1s-projects.vercel.app",
+                "https://login-angular-n7ak3ydtd-gerfy1s-projects.vercel.app"
+        },
         allowedHeaders = "*",
         methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}
 )
@@ -28,7 +33,11 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+
+
+    @Autowired
     private UserRepository userRepository;
+
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     public AuthController() {
