@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping({"/api/auth"})
 @CrossOrigin(
-        origins = {"http://localhost:4200"}
+        origins = {"https://login-angular-eight.vercel.app/login"}
 )
 public class AuthController {
     @Autowired

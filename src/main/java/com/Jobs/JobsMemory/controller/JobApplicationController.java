@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping({"/api/job-applications"})
 @CrossOrigin(
-        origins = {"http://localhost:4200"}
+        origins = {"https://login-angular-eight.vercel.app/login"}
 )
 public class JobApplicationController {
     @Autowired
