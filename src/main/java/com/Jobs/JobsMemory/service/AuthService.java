@@ -47,10 +47,19 @@ public class AuthService {
     }
 
     public Optional<User> findByUsername(String username) {
-        System.out.println("Searching for user: " + username);
-        Optional<User> user = this.userRepository.findByUsername(username);
-        System.out.println("User found: " + user.isPresent());
-        return user;
+        try {
+            System.out.println("Searching for username in database: " + username);
+            Optional<User> result = this.userRepository.findByUsername(username);
+            System.out.println("Result found: " + result.isPresent());
+            if (result.isPresent()) {
+                System.out.println("User details: " + result.get().getId() + " - " + result.get().getUsername());
+            }
+            return result;
+        } catch (Exception e) {
+            System.err.println("Error in findByUsername: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     public boolean checkPassword(String rawPassword, String encodedPassword) {
