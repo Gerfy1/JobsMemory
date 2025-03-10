@@ -45,6 +45,7 @@ public class SecurityConfig {
         config.addAllowedOrigin("https://login-angular-eight.vercel.app");
         config.addAllowedOrigin("http://localhost:4200");
         config.addAllowedHeader("*");
+        config.addExposedHeader("Authorization");
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
@@ -56,6 +57,7 @@ public class SecurityConfig {
         config.setAllowCredentials(true);
         config.addAllowedOrigin("https://login-angular-eight.vercel.app");
         config.addAllowedHeader("*");
+        config.addExposedHeader("Authorization");
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**", config);
         return source;
