@@ -26,29 +26,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public JwtAuthenticationFilter() {
     }
 
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        this.logger.info("Processing request: " + request.getRequestURI());
-        String authHeader = request.getHeader("Authorization");
-        this.logger.info("Auth header: " + authHeader);
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            try {
-                String jwt = authHeader.substring(7);
-                String username = this.jwtUtil.extractUsername(jwt);
-                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-                    if (this.jwtUtil.isTokenValid(jwt, userDetails)) {
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, (Object)null, userDetails.getAuthorities());
-                        authToken.setDetails((new WebAuthenticationDetailsSource()).buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
-                    }
-                }
-            } catch (Exception e) {
-                this.logger.error("Cannot set user authentication: " + e);
-            }
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
 
+        String path = request.getRequestURI();
+        logger.info("Processing request: " + path);
+
+        if (path.startsWith("/api/auth/") || path.equals("/api/auth")) {
+            logger.info("Public endpoint, skipping JWT validation");
             filterChain.doFilter(request, response);
-        } else {
-            filterChain.doFilter(request, response);
+            return;
         }
+
+        String authHeader = request.getHeader("Authorization");
+        logger.info("Auth header: " + authHeader);
+
+        filterChain.doFilter(request, response);
     }
 }
