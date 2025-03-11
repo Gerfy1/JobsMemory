@@ -5,6 +5,8 @@ import com.Jobs.JobsMemory.model.User;
 import com.Jobs.JobsMemory.repository.UserRepository;
 import com.Jobs.JobsMemory.util.JwtUtil;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,19 +26,52 @@ public class AuthService {
     }
 
     public ResponseEntity<?> login(User user) {
-        Optional<User> foundUser = this.userRepository.findByUsername(user.getUsername());
-        if (foundUser.isPresent() && this.passwordEncoder.matches(user.getPassword(), foundUser.get().getPassword())) {
-            User authenticatedUser = foundUser.get();
-            String token = this.jwtUtil.generateToken(
-                    new org.springframework.security.core.userdetails.User(
-                            authenticatedUser.getUsername(),
-                            authenticatedUser.getPassword(),
-                            new ArrayList<>()
-                    )
-            );
-            return ResponseEntity.ok(new LoginResponse(token, authenticatedUser.getId(), authenticatedUser.getUsername()));
-        } else {
-            return ResponseEntity.status(401).body("Usuário ou senha inválidos");
+        System.out.println("=== INÍCIO DO PROCESSO DE LOGIN ===");
+        System.out.println("Tentativa de login para: " + user.getUsername());
+
+        try {
+            Optional<User> foundUser = this.userRepository.findByUsername(user.getUsername());
+
+            if (foundUser.isPresent()) {
+                User dbUser = foundUser.get();
+                System.out.println("Usuário encontrado no DB: " + dbUser.getUsername());
+                System.out.println("Senha enviada (primeiros 10 chars): " +
+                        (user.getPassword().length() > 10 ? user.getPassword().substring(0, 10) + "..." : user.getPassword()));
+                System.out.println("Senha no DB (primeiros 10 chars): " + dbUser.getPassword().substring(0, 10) + "...");
+
+                boolean passwordMatches = this.passwordEncoder.matches(user.getPassword(), dbUser.getPassword());
+                System.out.println("Senhas coincidem? " + passwordMatches);
+
+                if (passwordMatches) {
+                    System.out.println("Autenticação bem-sucedida, gerando token...");
+                    String token = this.jwtUtil.generateToken(
+                            new org.springframework.security.core.userdetails.User(
+                                    dbUser.getUsername(),
+                                    dbUser.getPassword(),
+                                    new ArrayList<>()
+                            )
+                    );
+                    System.out.println("Token gerado com sucesso");
+                    return ResponseEntity.ok(new LoginResponse(token, dbUser.getId(), dbUser.getUsername()));
+                } else {
+                    System.out.println("Senha incorreta");
+                    Map<String, String> response = new HashMap<>();
+                    response.put("message", "Usuário ou senha inválidos");
+                    return ResponseEntity.status(401).body(response);
+                }
+            } else {
+                System.out.println("Usuário não encontrado: " + user.getUsername());
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Usuário ou senha inválidos");
+                return ResponseEntity.status(401).body(response);
+            }
+        } catch (Exception e) {
+            System.out.println("ERRO no login: " + e.getMessage());
+            e.printStackTrace();
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Erro no servidor: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
         }
     }
 
