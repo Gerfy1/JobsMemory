@@ -33,14 +33,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         logger.info("Processing request: " + path);
 
-        if (path.startsWith("/api/auth/")) {
-            logger.info("AUTH ENDPOINT: Permitindo acesso sem validação JWT");
+        if (path.startsWith("/api/auth/") || path.equals("/api/auth")) {
+            logger.info("AUTH ENDPOINT: Permitindo sem verificação de JWT");
             filterChain.doFilter(request, response);
             return;
         }
-
         String authHeader = request.getHeader("Authorization");
         logger.info("Auth header: " + authHeader);
+
+        String username = null;
+        String jwt = null;
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            jwt = authHeader.substring(7);
+            try {
+                username = jwtUtil.extractUsername(jwt);
+            } catch (Exception e) {
+                logger.error("Erro ao extrair username do token", e);
+            }
+        }
+
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+
+            if (jwtUtil.isTokenValid(jwt, userDetails)) {
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+        }
 
         filterChain.doFilter(request, response);
     }
