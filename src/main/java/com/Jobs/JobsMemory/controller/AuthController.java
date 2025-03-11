@@ -88,6 +88,7 @@ public class AuthController {
         return this.authService.login(user);
     }
     @GetMapping("/test-auth")
+    @CrossOrigin(origins = "*")
     @ResponseBody
     public String testAuth() {
         try {
