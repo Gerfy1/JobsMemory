@@ -14,6 +14,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,6 +38,9 @@ public class AuthController {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -82,5 +86,33 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody User user) {
         System.out.println("Received login request: " + user);
         return this.authService.login(user);
+    }
+    @GetMapping("/test-auth")
+    @ResponseBody
+    public String testAuth() {
+        try {
+            long userCount = userRepository.count();
+
+            StringBuilder result = new StringBuilder();
+            result.append("Conexão com banco OK.\n");
+            result.append("Usuários encontrados: ").append(userCount).append("\n");
+
+            if (userCount == 0) {
+                User testUser = new User();
+                testUser.setUsername("test" + System.currentTimeMillis());
+                testUser.setPassword(passwordEncoder.encode("password"));
+                testUser.setRole("USER");
+
+                User saved = userRepository.save(testUser);
+                result.append("Usuário de teste criado com ID: ").append(saved.getId());
+            } else {
+                result.append("Usuários existentes:\n");
+                userRepository.findAll().forEach(u -> result.append("- ").append(u.getUsername()).append("\n"));
+            }
+
+            return result.toString();
+        } catch (Exception e) {
+            return "ERRO: " + e.getMessage() + "\n" + e.getClass().getName();
+        }
     }
 }
