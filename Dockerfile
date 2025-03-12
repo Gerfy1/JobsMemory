@@ -1,17 +1,22 @@
 FROM maven:3.9.7-amazoncorretto-17 AS build
 
-COPY src /app/src
-COPY pom.xml /app
-
 WORKDIR /app
 
-RUN mvn clean install
+COPY pom.xml mvnw mvnw.cmd ./
+COPY .mvn .mvn
+
+RUN mvn dependency:go-offline
+
+COPY src ./src
+COPY resources ./resources
+
+RUN mvn clean package -DskipTests
 
 FROM amazoncorretto:17-alpine-jdk
 
-COPY --from=build /release/*.jar /app/app.jar
-
 WORKDIR /app
+
+COPY --from=build /app/target/*.jar /app/app.jar
 
 EXPOSE 8080
 
