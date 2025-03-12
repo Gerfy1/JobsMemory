@@ -8,7 +8,6 @@ COPY .mvn .mvn
 RUN mvn dependency:go-offline
 
 COPY src ./src
-COPY resources ./resources
 
 RUN mvn clean package -DskipTests
 
