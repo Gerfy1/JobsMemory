@@ -1,13 +1,17 @@
 package com.Jobs.JobsMemory.controller;
 
+import com.Jobs.JobsMemory.dto.ReminderCreateDTO;
 import com.Jobs.JobsMemory.model.JobApplication;
 import com.Jobs.JobsMemory.model.Reminder;
 import com.Jobs.JobsMemory.model.User;
 import com.Jobs.JobsMemory.service.JobApplicationService;
+import com.Jobs.JobsMemory.service.NotificationService;
 import com.Jobs.JobsMemory.service.ReminderService;
 import com.Jobs.JobsMemory.service.UserService;
 import java.util.List;
 import java.util.Optional;
+
+import jakarta.validation.Valid;
 import lombok.Generated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +38,14 @@ public class ReminderController {
     private final ReminderService reminderService;
     private final UserService userService;
     private final JobApplicationService jobApplicationService;
+    private final NotificationService notificationService;
 
     @Autowired
-    public ReminderController(ReminderService reminderService, UserService userService, JobApplicationService jobApplicationService) {
+    public ReminderController(ReminderService reminderService, UserService userService, JobApplicationService jobApplicationService, NotificationService notificationService) {
         this.reminderService = reminderService;
         this.userService = userService;
         this.jobApplicationService = jobApplicationService;
+        this.notificationService = notificationService;
     }
 
     @GetMapping
@@ -92,36 +98,46 @@ public class ReminderController {
     }
 
     @PostMapping
-    public ResponseEntity<Reminder> createReminder(@RequestBody Reminder reminderRequest) {
-        log.info("Recebendo novo lembrete: {}", reminderRequest);
-        log.info("Data recebida: {}", reminderRequest.getDate());
+    public ResponseEntity<?> createReminder(@Valid @RequestBody ReminderCreateDTO reminderDto) {
+        log.info("Recebendo novo lembrete DTO: {}", reminderDto);
         User currentUser = this.getCurrentUser();
         if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        } else {
-            Long jobApplicationId = reminderRequest.getJobApplicationId();
-            if (jobApplicationId == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-            } else {
-                Optional<JobApplication> jobAppOptional = this.jobApplicationService.getJobApplicationById(jobApplicationId);
-                if (jobAppOptional.isEmpty()) {
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-                } else {
-                    JobApplication jobApp = (JobApplication)jobAppOptional.get();
-                    if (!jobApp.getUser().getId().equals(currentUser.getId())) {
-                        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-                    } else {
-                        Reminder reminder = new Reminder();
-                        reminder.setTitle(reminderRequest.getTitle());
-                        reminder.setDescription(reminderRequest.getDescription());
-                        reminder.setDate(reminderRequest.getDate());
-                        reminder.setCompleted(false);
-                        reminder.setJobApplication(jobApp);
-                        Reminder savedReminder = this.reminderService.saveReminder(reminder);
-                        return ResponseEntity.status(HttpStatus.CREATED).body(savedReminder);
-                    }
-                }
-            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não autenticado.");
+        }
+
+        Long jobApplicationId = reminderDto.getJobApplicationId();
+
+        Optional<JobApplication> jobAppOptional = this.jobApplicationService.getJobApplicationById(jobApplicationId);
+        if (jobAppOptional.isEmpty()) {
+            log.error("JobApplication não encontrada para o ID: {}", jobApplicationId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Aplicação de vaga não encontrada com ID: " + jobApplicationId);
+        }
+
+        JobApplication jobApp = jobAppOptional.get();
+        if (!jobApp.getUser().getId().equals(currentUser.getId())) {
+            log.warn("Tentativa de criar lembrete para JobApplication de outro usuário.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("A aplicação de vaga não pertence ao usuário atual.");
+        }
+
+        Reminder reminderToSave = new Reminder();
+        reminderToSave.setTitle(reminderDto.getTitle());
+        reminderToSave.setDescription(reminderDto.getDescription());
+        reminderToSave.setDate(reminderDto.getDate());
+        reminderToSave.setCompleted(false);
+        reminderToSave.setJobApplication(jobApp);
+
+        try {
+            Reminder savedReminder = this.reminderService.saveReminder(reminderToSave);
+            log.info("Lembrete salvo com sucesso: {}", savedReminder);
+
+            String message = "Novo lembrete '" + savedReminder.getTitle() + "' criado.";
+            notificationService.createNotification(currentUser, message, "REMINDER_CREATED", savedReminder.getId());
+            log.info("Notificação para criação do lembrete (ID: {}) enviada.", savedReminder.getId());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedReminder);
+        } catch (Exception e) {
+            log.error("Erro ao salvar lembrete ou criar notificação: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno ao salvar o lembrete.");
         }
     }
 

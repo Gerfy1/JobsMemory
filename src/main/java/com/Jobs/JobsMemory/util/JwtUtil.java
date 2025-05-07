@@ -11,10 +11,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component
 public class JwtUtil {
     @Value("${jwt.secret}")
     private String secret;
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
 
     public JwtUtil() {
     }
@@ -33,11 +38,23 @@ public class JwtUtil {
     }
 
     private Claims extractAllClaims(String token) {
-        return (Claims)Jwts.parser().setSigningKey(this.secret).parseClaimsJws(token).getBody();
+        try {
+            return Jwts.parser().setSigningKey(this.secret).parseClaimsJws(token).getBody();
+        } catch (Exception e) {
+            logger.error("Erro ao fazer parse ou validar assinatura do token: {}", e.getMessage());
+            throw e;
+        }
     }
 
+
     private Boolean isTokenExpired(String token) {
-        return this.extractExpiration(token).before(new Date());
+        try {
+            return this.extractExpiration(token).before(new Date());
+        } catch (Exception e) {
+            logger.error("Erro ao verificar token expirado: {}", e.getMessage());
+            return true;
+        }
+
     }
 
     public String generateToken(UserDetails userDetails) {
@@ -46,11 +63,52 @@ public class JwtUtil {
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
-        return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis())).setExpiration(new Date(System.currentTimeMillis() + 36000000L)).signWith(SignatureAlgorithm.HS256, this.secret).compact();
+        long nowMillis = System.currentTimeMillis();
+        Date now = new Date(nowMillis);
+        long expMillis = nowMillis + 36000000L;
+        Date exp = new Date(expMillis);
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(subject)
+                .setIssuedAt(now)
+                .setExpiration(exp)
+                .signWith(SignatureAlgorithm.HS256, this.secret)
+                .compact();
     }
 
     public Boolean isTokenValid(String token, UserDetails userDetails) {
-        String username = this.extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !this.isTokenExpired(token);
+        String usernameFromToken = null;
+        String usernameFromUserDetails = null;
+        boolean isUsernameMatch = false;
+        boolean isNotExpired = false;
+
+        try {
+            usernameFromToken = this.extractUsername(token);
+
+            if (userDetails != null) {
+                usernameFromUserDetails = userDetails.getUsername();
+                isUsernameMatch = usernameFromToken.equals(usernameFromUserDetails);
+            } else {
+                logger.warn("UserDetails fornecido para isTokenValid é nulo!");
+                isUsernameMatch = false;
+            }
+
+            isNotExpired = !this.isTokenExpired(token);
+
+            logger.info("--- Iniciando Validação do Token ---");
+            logger.info("Username extraído do Token : '{}'", usernameFromToken);
+            logger.info("Username vindo do UserDetails: '{}'", usernameFromUserDetails);
+            logger.info("Resultado da comparação (equals): {}", isUsernameMatch);
+            logger.info("Resultado da verificação (!isTokenExpired): {}", isNotExpired);
+            logger.info("Resultado final de isTokenValid: {}", (isUsernameMatch && isNotExpired));
+            logger.info("--- Fim da Validação do Token ---");
+
+        } catch (Exception e) {
+            logger.error("Erro inesperado durante isTokenValid: {}", e.getMessage(), e);
+            return false;
+        }
+
+        return isUsernameMatch && isNotExpired;
     }
 }
