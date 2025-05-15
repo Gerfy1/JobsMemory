@@ -54,6 +54,8 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.addAllowedOrigin("https://login-angular-eight.vercel.app");
+        config.addAllowedOrigin("https://login-angular-eight.vercel.app");
+        config.addAllowedOrigin("https://login-angular-memory.vercel.app");
         config.addAllowedOrigin("https://login-angular-git-master-gerfy1s-projects.vercel.app");
         config.addAllowedOrigin("https://login-angular-n7ak3ydtd-gerfy1s-projects.vercel.app");
         config.addAllowedOrigin("http://localhost:4200");
@@ -69,6 +71,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.addAllowedOrigin("https://login-angular-eight.vercel.app");
+        config.addAllowedOrigin("https://login-angular-memory.vercel.app");
         config.addAllowedOrigin("https://login-angular-git-master-gerfy1s-projects.vercel.app");
         config.addAllowedOrigin("https://login-angular-n7ak3ydtd-gerfy1s-projects.vercel.app");
         config.addAllowedOrigin("http://localhost:4200");
