@@ -43,6 +43,16 @@ A aplicação completa pode ser acessada em: **https://login-angular-memory.verc
 
 Importante: Como está hospedado no Render em uma versão gratuita, é necessario aguardar 1 minuto após a tentativa de login, pois a maquina fica em Standby.
 
+## 🖼️ Screenshots da Aplicação
+
+![Tela inicial](https://i.imgur.com/gGuSbBm.png) 
+![Tela inicial](https://i.imgur.com/jIjzEXc.png) 
+![Registro de candidaturas](https://i.imgur.com/tRGmyX9.png)
+![Registro de lembretes/notificações](https://i.imgur.com/2WJYeud.png)
+![Novidades](https://i.imgur.com/MSOxVln.png)
+![Sobre](https://i.imgur.com/k1SKkrW.png)
+![Conecte-se](https://i.imgur.com/VUFDVXk.png)
+
 ## Principais Funcionalidades da API (Backend)
 O backend expõe uma API RESTful para comunicação com o frontend. Alguns dos principais recursos incluem:
 
