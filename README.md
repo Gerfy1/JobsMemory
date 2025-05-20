@@ -3,12 +3,14 @@
 ## Sobre o Jobs Memory
 Bem-vindo(a) ao backend do **Jobs Memory**! Sua bússola no universo da aplicações em empregos. 🧭
 
-O Jobs Memory nasceu da necessidade de simplificar e organizar o processo, muitas vezes caótico, de se candidatar a vagas. Nosso objetivo é que você, candidato(a), tenha total controle e clareza sobre cada passo da sua jornada profissional.
+O Jobs Memory nasceu da necessidade de simplificar e organizar o processo, muitas vezes caótico, de se candidatar a vagas. 
 
-Este repositório contém o código-fonte do backend, construído em Java, que serve como o cérebro da aplicação, gerenciando todos os dados e a lógica de negócios.
+Nosso objetivo é que você, candidato(a), tenha total controle e clareza sobre cada passo da sua jornada profissional.
+
+Este repositório contém o código-fonte do backend, construído em Java, que serve como o cérebro da aplicação, gerenciando todos os dados e a lógica/regra de negócios.
 
 ### Nossa Missão
-Empoderar candidatos(as) com uma ferramenta intuitiva e poderosa para gerenciar suas candidaturas, maximizando suas chances de sucesso e reduzindo o estresse da busca por uma nova oportunidade. 🎯
+Auxiliar candidatos(as) com uma ferramenta intuitiva e poderosa para gerenciar suas candidaturas, maximizando suas chances de sucesso e reduzindo o estresse da busca por uma nova oportunidade. 🎯
 
 ## Como Funciona?
 O Jobs Memory permite que os usuários:
